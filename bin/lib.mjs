@@ -6,7 +6,7 @@ import { homedir } from "node:os";
 // ── MCP server config ───────────────────────────────────────────────
 export const MCP_ENTRY = {
   command: "npx",
-  args: ["-y", "@ulinkly/mcp-server@0.1.8"],
+  args: ["-y", "@ulinkly/mcp-server@0.1.9"],
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────
