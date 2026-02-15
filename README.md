@@ -1,48 +1,89 @@
-# ULink Onboarding Plugin for Claude Code
+# ULink AI Setup
 
-Guides you through integrating ULink deep linking into your iOS, Android, or Flutter project — directly from Claude Code.
+> Set up ULink deep linking with one command using Claude Code, Cursor, or Antigravity.
 
-## Install
+## Quick Start
 
 ```bash
-# 1. Add the marketplace
-claude plugin marketplace add FlywheelStudio/ulink-onboarding-plugin
-
-# 2. Install the plugin
-claude plugin install ulink-onboarding@ulink
-
-# 3. Add the MCP server
-claude mcp add ulink -- npx -y @ulinkly/mcp-server@latest
-
-# 4. Restart Claude Code
+npx @ulinkly/setup
 ```
 
-### ULink CLI
+This detects your AI coding tools and configures the ULink MCP server + onboarding skill automatically. Then open your AI assistant in your project and ask it to **"setup ulink"**.
+
+## Manual Setup
+
+### Claude Code
+
+```bash
+# Install the plugin (includes MCP server + onboarding skill)
+claude plugin marketplace add FlywheelStudio/ulink-ai-setup
+claude plugin install ulink-onboarding@ulink
+```
+
+Restart Claude Code, then run `/setup-ulink` in your project.
+
+### Cursor
+
+**1. Add MCP server** — add to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "ulink": {
+      "command": "npx",
+      "args": ["-y", "@ulinkly/mcp-server@latest"]
+    }
+  }
+}
+```
+
+**2. Install skill** — copy `skills/setup-ulink/` to `~/.cursor/skills/setup-ulink/`.
+
+Restart Cursor, then ask the agent: **"setup ulink"**.
+
+### Antigravity
+
+**1. Add MCP server** — add to `~/.gemini/antigravity/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "ulink": {
+      "command": "npx",
+      "args": ["-y", "@ulinkly/mcp-server@latest"]
+    }
+  }
+}
+```
+
+**2. Install skill** — copy `skills/setup-ulink/` to `~/.gemini/antigravity/skills/setup-ulink/`.
+
+Restart Antigravity, then ask the agent: **"setup ulink"**.
+
+## What the AI Does
+
+1. **Detect project** — scans your directory to identify Flutter, iOS, or Android
+2. **Connect to ULink** — authenticates via MCP and connects to your ULink project
+3. **Select domain** — pick an existing domain or create a new one
+4. **Configure platforms** — sets up Associated Domains (iOS), App Links (Android), or both (Flutter)
+5. **Edit local files** — proposes changes and applies them only after your approval
+6. **Verify** — runs the ULink CLI to validate your deep link configuration
+7. **Summarize** — shows everything that was configured and next steps
+
+## ULink CLI
+
+The AI uses the CLI for verification. Install it with:
 
 ```bash
 curl -fsSL https://ulink.ly/install.sh | bash
 ```
-
-## Usage
-
-Run the following command in your project directory:
-
-```
-/setup-ulink
-```
-
-## What it does
-
-1. **Detect project** — Scans your working directory to identify the project type (Flutter, iOS, or Android) and its structure.
-2. **Connect to ULink** — Authenticates with the ULink platform via the MCP server to access your account and projects.
-3. **Select domain** — Lets you pick an existing ULink domain or create a new one for your deep links.
-4. **Configure platforms** — Sets up platform-specific configuration (Associated Domains for iOS, App Links for Android, or both for Flutter).
-5. **Edit local files with confirmation** — Proposes changes to your project files (entitlements, manifests, config files) and applies them only after your approval.
-6. **Verify with CLI** — Runs the ULink CLI to validate that your deep link configuration is correct and working.
-7. **Summarize** — Provides a complete summary of all changes made and next steps to start using deep links in your app.
 
 ## Supported Platforms
 
 - Flutter
 - Native iOS
 - Native Android
+
+## License
+
+MIT

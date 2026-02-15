@@ -1,0 +1,30 @@
+{
+  "name": "@ulinkly/setup",
+  "version": "0.1.0",
+  "description": "Set up ULink deep linking with your AI coding assistant (Claude Code, Cursor, Antigravity)",
+  "type": "module",
+  "bin": {
+    "ulink-setup": "./bin/setup.mjs"
+  },
+  "files": [
+    "bin/",
+    "skills/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FlywheelStudio/ulink-ai-setup"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ulink",
+    "deep-linking",
+    "mcp",
+    "claude-code",
+    "cursor",
+    "antigravity",
+    "ai-setup"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

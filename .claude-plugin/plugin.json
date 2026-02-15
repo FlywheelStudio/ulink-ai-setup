@@ -6,8 +6,8 @@
     "name": "ULink",
     "url": "https://ulink.ly"
   },
-  "homepage": "https://docs.ulink.ly/getting-started/mcp",
-  "repository": "https://github.com/FlywheelStudio/ulink-onboarding-plugin",
+  "homepage": "https://docs.ulink.ly/getting-started/ai-setup",
+  "repository": "https://github.com/FlywheelStudio/ulink-ai-setup",
   "license": "MIT",
   "keywords": ["ulink", "deep-linking", "onboarding", "mcp", "ios", "android", "flutter"],
   "skills": "./skills/"

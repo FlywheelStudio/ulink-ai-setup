@@ -12,7 +12,7 @@
       "name": "ulink-onboarding",
       "source": {
         "source": "github",
-        "repo": "FlywheelStudio/ulink-onboarding-plugin"
+        "repo": "FlywheelStudio/ulink-ai-setup"
       },
       "description": "Guided onboarding for integrating ULink deep linking into iOS, Android, and Flutter projects",
       "version": "0.1.3",

@@ -25,12 +25,39 @@ You are the ULink onboarding assistant. Walk the developer through integrating U
 Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
 
 - If the tool is **not available** (tool not found / connection error):
-  1. Tell the user the MCP server needs to be added, then run this command via Bash:
+  1. Tell the user the ULink MCP server is not connected. Show them the setup command for their tool:
+
+     **Claude Code:**
+     ```bash
+     claude plugin marketplace add FlywheelStudio/ulink-ai-setup
+     claude plugin install ulink-onboarding@ulink
      ```
-     claude mcp add ulink -- npx -y @ulinkly/mcp-server@latest
+
+     **Cursor:** Add to `~/.cursor/mcp.json`:
+     ```json
+     {
+       "mcpServers": {
+         "ulink": {
+           "command": "npx",
+           "args": ["-y", "@ulinkly/mcp-server@latest"]
+         }
+       }
+     }
      ```
-  2. Tell the user:
-     > I've added the ULink MCP server. Please restart Claude Code and run `/setup-ulink` again.
+
+     **Antigravity:** Add to `~/.gemini/antigravity/mcp_config.json`:
+     ```json
+     {
+       "mcpServers": {
+         "ulink": {
+           "command": "npx",
+           "args": ["-y", "@ulinkly/mcp-server@latest"]
+         }
+       }
+     }
+     ```
+
+  2. Tell the user to restart their editor and try again.
   3. **Stop here.** Do not proceed to Phase 2.
 
 ### 1b. CLI
@@ -51,11 +78,7 @@ Run `which ulink` to check if the ULink CLI is installed.
 If `list_projects` returned an authentication error (401, unauthorized, token expired):
 
 - Tell the user the MCP server needs to re-authenticate. The MCP server handles auth via browser-based OAuth — it should prompt automatically on the next call.
-- If authentication keeps failing, suggest removing and re-adding the MCP server:
-  ```
-  claude mcp remove ulink
-  claude mcp add ulink -- npx -y @ulinkly/mcp-server@latest
-  ```
+- If authentication keeps failing, suggest removing and re-adding the MCP server, or setting the `ULINK_API_KEY` environment variable.
 - **Stop here** if auth cannot be resolved.
 
 ---
@@ -94,7 +117,7 @@ Use the Glob tool to scan for project markers (`pubspec.yaml`, `build.gradle`, `
 
 If no project markers are found (no rule matches):
 
-> No mobile project detected in the current directory. Please `cd` to your Flutter, iOS, or Android project root and run `/setup-ulink` again.
+> No mobile project detected in the current directory. Please `cd` to your Flutter, iOS, or Android project root and try again.
 
 **Stop here.**
 
@@ -516,4 +539,4 @@ List every file that was created or edited, with a one-line description of the c
 
 ### Re-run Anytime
 
-You can run `/setup-ulink` again at any time to reconfigure or add platforms.
+You can run this setup again at any time to reconfigure or add platforms.
