@@ -11,5 +11,10 @@
   "license": "MIT",
   "keywords": ["ulink", "deep-linking", "onboarding", "mcp", "ios", "android", "flutter"],
   "skills": "./skills/",
-  "mcpServers": "./mcp.json"
+  "mcpServers": {
+    "ulink": {
+      "command": "npx",
+      "args": ["-y", "@ulinkly/mcp-server@latest"]
+    }
+  }
 }
