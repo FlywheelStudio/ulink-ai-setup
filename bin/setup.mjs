@@ -1,19 +1,14 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
+import { commandExists, writeMcpConfig, copySkill } from "./lib.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILL_SOURCE = join(__dirname, "..", "skills", "setup-ulink");
-
-// ── MCP server config ───────────────────────────────────────────────
-const MCP_ENTRY = {
-  command: "npx",
-  args: ["-y", "@ulinkly/mcp-server@latest"],
-};
 
 // ── Platform definitions ────────────────────────────────────────────
 const PLATFORMS = {
@@ -30,7 +25,7 @@ const PLATFORMS = {
     skillDir: join(homedir(), ".cursor", "skills", "setup-ulink"),
     setup: (cfg) => {
       writeMcpConfig(cfg.mcpConfig);
-      copySkill(cfg.skillDir);
+      copySkill(cfg.skillDir, SKILL_SOURCE);
     },
   },
   antigravity: {
@@ -42,58 +37,17 @@ const PLATFORMS = {
     skillDir: join(homedir(), ".gemini", "antigravity", "skills", "setup-ulink"),
     setup: (cfg) => {
       writeMcpConfig(cfg.mcpConfig);
-      copySkill(cfg.skillDir);
+      copySkill(cfg.skillDir, SKILL_SOURCE);
     },
   },
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
-function commandExists(cmd) {
-  try {
-    execSync(`which ${cmd} 2>/dev/null || where ${cmd} 2>nul`, {
-      stdio: "ignore",
-    });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function writeMcpConfig(configPath) {
-  let config = { mcpServers: {} };
-  try {
-    const raw = readFileSync(configPath, "utf-8");
-    config = JSON.parse(raw);
-    if (!config.mcpServers) config.mcpServers = {};
-  } catch {
-    // File doesn't exist — start fresh
-  }
-
-  if (config.mcpServers.ulink) {
-    log("  MCP server already configured, updating...");
-  }
-
-  config.mcpServers.ulink = MCP_ENTRY;
-  mkdirSync(dirname(configPath), { recursive: true });
-  writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
-  log(`  MCP config written to ${configPath}`);
-}
-
-function copySkill(destDir) {
-  if (!existsSync(SKILL_SOURCE)) {
-    log("  Warning: skill source not found, skipping skill install");
-    return;
-  }
-  mkdirSync(destDir, { recursive: true });
-  cpSync(SKILL_SOURCE, destDir, { recursive: true });
-  log(`  Skill installed to ${destDir}`);
-}
-
 function installClaudePlugin() {
-  log("  Installing ULink plugin (includes MCP server + onboarding skill)...");
+  console.log("  Installing ULink plugin (includes MCP server + onboarding skill)...");
   try {
-    log("  Adding marketplace...");
+    console.log("  Adding marketplace...");
     try {
       execSync(
         "claude plugin marketplace add FlywheelStudio/ulink-ai-setup",
@@ -103,20 +57,16 @@ function installClaudePlugin() {
       // Marketplace may already be added — continue
     }
 
-    log("  Installing plugin...");
+    console.log("  Installing plugin...");
     execSync("claude plugin install ulink-onboarding@ulink", {
       stdio: "inherit",
     });
-    log("  Plugin installed (MCP server + onboarding skill).");
+    console.log("  Plugin installed (MCP server + onboarding skill).");
   } catch {
-    log("  Failed to install plugin automatically. You can install it manually:");
-    log("    claude plugin marketplace add FlywheelStudio/ulink-ai-setup");
-    log("    claude plugin install ulink-onboarding@ulink");
+    console.log("  Failed to install plugin automatically. You can install it manually:");
+    console.log("    claude plugin marketplace add FlywheelStudio/ulink-ai-setup");
+    console.log("    claude plugin install ulink-onboarding@ulink");
   }
-}
-
-function log(msg) {
-  console.log(msg);
 }
 
 // ── Interactive checkbox selector ───────────────────────────────────

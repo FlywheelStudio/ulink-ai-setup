@@ -24,7 +24,14 @@
     "antigravity",
     "ai-setup"
   ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
   }
 }
