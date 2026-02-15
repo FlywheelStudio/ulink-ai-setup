@@ -8,16 +8,16 @@ user-invocable: true
 ## Dynamic Context
 
 Project files:
-!`ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle *.xcodeproj *.xcworkspace Podfile Package.swift 2>/dev/null || echo "NO_PROJECT_FILES_FOUND"`
+!`ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle *.xcodeproj *.xcworkspace Podfile Package.swift 2>/dev/null`
 
 ULink CLI status:
-!`ulink --version 2>/dev/null || echo "NOT_INSTALLED"`
+!`ulink --version 2>/dev/null`
 
 Current directory:
 !`pwd`
 
 Existing ULink project linkage:
-!`ulink project show 2>/dev/null || echo "NOT_LINKED"`
+!`ulink project show 2>/dev/null`
 
 ---
 
