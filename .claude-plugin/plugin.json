@@ -1,6 +1,6 @@
 {
   "name": "ulink-onboarding",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Guided onboarding for integrating ULink deep linking into iOS, Android, and Flutter projects",
   "author": {
     "name": "ULink",
@@ -10,11 +10,5 @@
   "repository": "https://github.com/FlywheelStudio/ulink-onboarding-plugin",
   "license": "MIT",
   "keywords": ["ulink", "deep-linking", "onboarding", "mcp", "ios", "android", "flutter"],
-  "skills": "./skills/",
-  "mcpServers": {
-    "ulink": {
-      "command": "npx",
-      "args": ["-y", "@ulinkly/mcp-server@latest"]
-    }
-  }
+  "skills": "./skills/"
 }
