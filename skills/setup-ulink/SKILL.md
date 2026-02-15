@@ -220,7 +220,23 @@ Gather the following settings per platform, suggesting values from Phase 2 detec
 
 ### 5b. Push Settings to Dashboard
 
-Call the `configure_project` MCP tool with all collected settings:
+**Before calling the API, display every value to the user and ask for explicit confirmation:**
+
+> I'm about to update your ULink dashboard with these settings:
+>
+> - **iOS Bundle ID:** `<value>`
+> - **iOS Team ID:** `<value>`
+> - **iOS URL Scheme:** `<value>://`
+> - **Android Package Name:** `<value>`
+> - **Android SHA-256 Fingerprints:** `<value>`
+> - **Android URL Scheme:** `<value>://`
+> - **Domain:** `<value>`
+>
+> Does this look correct? (yes/no)
+
+**Only proceed after the user confirms.** If they say no, ask which values to change and re-confirm.
+
+Then call the `configure_project` MCP tool with the confirmed settings:
 - iOS bundle ID
 - iOS team ID
 - Android package name
