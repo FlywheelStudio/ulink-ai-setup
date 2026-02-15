@@ -8,7 +8,7 @@ user-invocable: true
 ## Dynamic Context
 
 Project files:
-!`ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle *.xcodeproj *.xcworkspace Podfile Package.swift 2>/dev/null`
+!`bash -c 'ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle *.xcodeproj *.xcworkspace Podfile Package.swift 2>/dev/null'`
 
 Current directory:
 !`pwd`
