@@ -5,17 +5,16 @@ Guides you through integrating ULink deep linking into your iOS, Android, or Flu
 ## Install
 
 ```bash
-claude plugin install ulink-onboarding
-```
+# 1. Add the marketplace
+claude plugin marketplace add FlywheelStudio/ulink-onboarding-plugin
 
-## Prerequisites
+# 2. Install the plugin
+claude plugin install ulink-onboarding@ulink
 
-### ULink MCP Server (bundled)
-
-The MCP server is bundled with this plugin and starts automatically. If it doesn't activate, add it manually:
-
-```bash
+# 3. Add the MCP server
 claude mcp add ulink -- npx -y @ulinkly/mcp-server@latest
+
+# 4. Restart Claude Code
 ```
 
 ### ULink CLI

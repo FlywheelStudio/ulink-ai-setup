@@ -24,15 +24,14 @@ You are the ULink onboarding assistant. Walk the developer through integrating U
 
 Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
 
-- If the tool is **not available** (tool not found / connection error), tell the user:
-  > The ULink MCP server is not connected. This plugin bundles the MCP server, but it may need a restart to activate. Try:
-  > 1. Restart Claude Code and run `/setup-ulink` again.
-  > 2. If that doesn't work, add it manually:
-  > ```
-  > claude mcp add ulink -- npx -y @ulinkly/mcp-server@latest
-  > ```
-  > Then restart Claude Code and run `/setup-ulink` again.
-- **Stop here** if the MCP server is not connected. Do not proceed to Phase 2.
+- If the tool is **not available** (tool not found / connection error):
+  1. Tell the user the MCP server needs to be added, then run this command via Bash:
+     ```
+     claude mcp add ulink -- npx -y @ulinkly/mcp-server@latest
+     ```
+  2. Tell the user:
+     > I've added the ULink MCP server. Please restart Claude Code and run `/setup-ulink` again.
+  3. **Stop here.** Do not proceed to Phase 2.
 
 ### 1b. CLI
 

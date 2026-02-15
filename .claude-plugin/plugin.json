@@ -1,6 +1,6 @@
 {
   "name": "ulink-onboarding",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Guided onboarding for integrating ULink deep linking into iOS, Android, and Flutter projects",
   "author": {
     "name": "ULink",
