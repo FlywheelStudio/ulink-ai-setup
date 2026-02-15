@@ -1,10 +1,14 @@
 {
   "name": "ulink",
   "description": "Official ULink plugins for Claude Code",
+  "owner": {
+    "name": "ULink",
+    "url": "https://ulink.ly"
+  },
   "plugins": [
     {
       "name": "ulink-onboarding",
-      "path": "."
+      "source": "."
     }
   ]
 }
