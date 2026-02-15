@@ -10,14 +10,8 @@ user-invocable: true
 Project files:
 !`ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle *.xcodeproj *.xcworkspace Podfile Package.swift 2>/dev/null`
 
-ULink CLI status:
-!`ulink --version 2>/dev/null`
-
 Current directory:
 !`pwd`
-
-Existing ULink project linkage:
-!`ulink project show 2>/dev/null`
 
 ---
 
