@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ulink": {
+      "command": "npx",
+      "args": ["-y", "@ulinkly/mcp-server@latest"]
+    }
+  }
+}

@@ -10,7 +10,9 @@ claude plugin install ulink-onboarding
 
 ## Prerequisites
 
-### ULink MCP Server
+### ULink MCP Server (bundled)
+
+The MCP server is bundled with this plugin and starts automatically. If it doesn't activate, add it manually:
 
 ```bash
 claude mcp add ulink -- npx -y @ulinkly/mcp-server@latest

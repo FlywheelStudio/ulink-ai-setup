@@ -10,5 +10,6 @@
   "repository": "https://github.com/FlywheelStudio/ulink-onboarding-plugin",
   "license": "MIT",
   "keywords": ["ulink", "deep-linking", "onboarding", "mcp", "ios", "android", "flutter"],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "mcpServers": "./mcp.json"
 }
