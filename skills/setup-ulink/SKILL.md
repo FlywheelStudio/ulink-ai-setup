@@ -38,12 +38,13 @@ Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
 
 Run `which ulink` to check if the ULink CLI is installed.
 
-- If the command returns nothing (CLI not found), tell the user:
-  > The ULink CLI is not installed. You can install it with:
-  > ```
-  > curl -fsSL https://ulink.ly/install.sh | bash
-  > ```
-  > The CLI is needed for verification in Phase 6. You can continue setup now and install it before verification.
+- If the command returns nothing (CLI not found), ask the user:
+  > The ULink CLI is not installed. It's needed for verification in Phase 6. Would you like me to install it now?
+  If the user agrees, run:
+  ```bash
+  curl -fsSL https://ulink.ly/install.sh | bash
+  ```
+  Then verify with `which ulink` again. If the user declines, note that the CLI must be installed before Phase 6 and continue.
 - If installed, continue.
 
 ### 1c. Authentication
