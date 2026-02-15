@@ -131,7 +131,7 @@ Call the `list_projects` MCP tool.
 
 - **No projects exist** — Offer to create one via the `create_project` MCP tool. Ask the user for:
   - Project name (suggest based on detected app name)
-  - Default fallback URL (the URL users see if deep linking fails)
+  - Default fallback URL (the URL users see if deep linking fails) — **must be HTTPS** (validate it starts with `https://` and is a well-formed URL; reject `javascript:`, `data:`, `file:`, and `http://` schemes)
 - **One project** — Show it and ask the user to confirm.
 - **Multiple projects** — List them all (name, slug, creation date) and ask the user to select one.
 
