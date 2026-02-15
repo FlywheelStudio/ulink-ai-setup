@@ -8,7 +8,7 @@ user-invocable: true
 ## Dynamic Context
 
 Project files:
-!`bash -c 'ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle *.xcodeproj *.xcworkspace Podfile Package.swift 2>/dev/null'`
+!`ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle Podfile Package.swift 2>/dev/null`
 
 Current directory:
 !`pwd`
@@ -63,7 +63,7 @@ If `list_projects` returned an authentication error (401, unauthorized, token ex
 
 ## Phase 2 — Detect Local Project
 
-Use the dynamic context (project files listing) and file reads to determine the project type. Apply the **first matching** rule:
+Use the dynamic context (project files listing), the Glob tool (e.g., `*.xcodeproj` and `*.xcworkspace`), and file reads to determine the project type. Apply the **first matching** rule:
 
 ### Detection Rules
 
