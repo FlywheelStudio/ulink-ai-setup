@@ -5,7 +5,6 @@ import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
-import { createInterface } from "node:readline";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILL_SOURCE = join(__dirname, "..", "skills", "setup-ulink");
@@ -94,7 +93,6 @@ function copySkill(destDir) {
 function installClaudePlugin() {
   log("  Installing ULink plugin (includes MCP server + onboarding skill)...");
   try {
-    // 1. Add the marketplace
     log("  Adding marketplace...");
     try {
       execSync(
@@ -105,7 +103,6 @@ function installClaudePlugin() {
       // Marketplace may already be added — continue
     }
 
-    // 2. Install the plugin (bundles MCP server via .mcp.json)
     log("  Installing plugin...");
     execSync("claude plugin install ulink-onboarding@ulink", {
       stdio: "inherit",
@@ -122,8 +119,95 @@ function log(msg) {
   console.log(msg);
 }
 
-function prompt(rl, question) {
-  return new Promise((resolve) => rl.question(question, resolve));
+// ── Interactive checkbox selector ───────────────────────────────────
+
+/**
+ * Shows an interactive checkbox list in the terminal.
+ * Arrow keys to move, space to toggle, enter to confirm.
+ *
+ * @param {string} title - Header text shown above the list
+ * @param {{ label: string, checked: boolean }[]} items - Selectable items
+ * @returns {Promise<number[]>} Indices of selected items
+ */
+function checkbox(title, items) {
+  return new Promise((resolve) => {
+    const { stdin, stdout } = process;
+    const wasRaw = stdin.isRaw;
+    let cursor = 0;
+    const checked = items.map((item) => item.checked);
+
+    function render(clear) {
+      if (clear) {
+        // Move up to overwrite previous render (title + items + hint)
+        stdout.write(`\x1b[${items.length + 2}A`);
+      }
+      stdout.write(`\x1b[2K  ${title}\n`);
+      items.forEach((item, i) => {
+        const check = checked[i] ? "\x1b[32m[x]\x1b[0m" : "[ ]";
+        const pointer = i === cursor ? "\x1b[36m>\x1b[0m" : " ";
+        stdout.write(`\x1b[2K  ${pointer} ${check} ${item.label}\n`);
+      });
+      stdout.write(`\x1b[2K  \x1b[2m(arrow keys to move, space to toggle, enter to confirm)\x1b[0m\n`);
+    }
+
+    render(false);
+
+    stdin.setRawMode(true);
+    stdin.resume();
+    stdin.setEncoding("utf-8");
+
+    function onData(key) {
+      // Ctrl+C
+      if (key === "\x03") {
+        stdin.setRawMode(wasRaw || false);
+        stdin.pause();
+        stdin.removeListener("data", onData);
+        process.exit(0);
+      }
+
+      // Enter
+      if (key === "\r" || key === "\n") {
+        stdin.setRawMode(wasRaw || false);
+        stdin.pause();
+        stdin.removeListener("data", onData);
+        const selected = [];
+        checked.forEach((c, i) => { if (c) selected.push(i); });
+        resolve(selected);
+        return;
+      }
+
+      // Space — toggle
+      if (key === " ") {
+        checked[cursor] = !checked[cursor];
+        render(true);
+        return;
+      }
+
+      // Arrow keys (escape sequences)
+      if (key === "\x1b[A" || key === "k") {
+        // Up
+        cursor = (cursor - 1 + items.length) % items.length;
+        render(true);
+        return;
+      }
+      if (key === "\x1b[B" || key === "j") {
+        // Down
+        cursor = (cursor + 1) % items.length;
+        render(true);
+        return;
+      }
+
+      // 'a' — toggle all
+      if (key === "a") {
+        const allChecked = checked.every(Boolean);
+        checked.fill(!allChecked);
+        render(true);
+        return;
+      }
+    }
+
+    stdin.on("data", onData);
+  });
 }
 
 // ── Main ────────────────────────────────────────────────────────────
@@ -145,61 +229,25 @@ async function main() {
     }
   }
 
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+  // Build checkbox items — detected tools are checked by default
+  const allIds = Object.keys(PLATFORMS);
+  const items = allIds.map((id) => ({
+    label: PLATFORMS[id].name + (detected.includes(id) ? " \x1b[2m(detected)\x1b[0m" : ""),
+    checked: detected.includes(id),
+  }));
 
-  let selected = [];
-  const allChoices = Object.entries(PLATFORMS);
+  const title = detected.length > 0
+    ? "Select which tools to set up:"
+    : "No AI tools detected. Select which to set up:";
 
-  if (detected.length === 0) {
-    // Nothing detected — show all options
-    console.log("  No AI tools detected on this system.");
-    console.log("  Which tool(s) would you like to set up?");
-    console.log();
-    allChoices.forEach(([, p], i) => console.log(`    ${i + 1}. ${p.name}`));
-    console.log(`    ${allChoices.length + 1}. All`);
-    console.log();
+  const selectedIndices = await checkbox(title, items);
 
-    const answer = await prompt(rl, "  Enter number(s), comma-separated: ");
-    selected = parseSelection(answer, allChoices);
-  } else {
-    // Show detected tools and let user pick
-    console.log("  Detected on this system:");
-    detected.forEach((id, i) =>
-      console.log(`    ${i + 1}. ${PLATFORMS[id].name}`)
-    );
-    console.log();
-
-    if (detected.length === 1) {
-      const answer = await prompt(
-        rl,
-        `  Set up ULink for ${PLATFORMS[detected[0]].name}? (Y/n) `
-      );
-      if (answer.toLowerCase() === "n") {
-        rl.close();
-        return;
-      }
-      selected = detected;
-    } else {
-      console.log(`    ${detected.length + 1}. All`);
-      console.log();
-      const answer = await prompt(
-        rl,
-        "  Which tool(s)? Enter number(s), comma-separated: "
-      );
-      const detectedChoices = detected.map((id) => [id, PLATFORMS[id]]);
-      selected = parseSelection(answer, detectedChoices);
-    }
-  }
-
-  rl.close();
-
-  if (selected.length === 0) {
+  if (selectedIndices.length === 0) {
     console.log("\n  No tools selected. Exiting.\n");
     return;
   }
+
+  const selected = selectedIndices.map((i) => allIds[i]);
 
   console.log();
 
@@ -207,7 +255,7 @@ async function main() {
   for (const id of selected) {
     const platform = PLATFORMS[id];
     console.log(`  Setting up ${platform.name}...`);
-    console.log("  ─".repeat(20));
+    console.log("  " + "\u2500".repeat(40));
 
     platform.setup(platform);
 
@@ -216,7 +264,7 @@ async function main() {
 
   // Summary
   console.log("  Done! Next steps:");
-  console.log("  ─".repeat(20));
+  console.log("  " + "\u2500".repeat(40));
   console.log();
 
   for (const id of selected) {
@@ -239,30 +287,10 @@ async function main() {
     }
   }
 
-  console.log("  The AI will walk you through the rest —");
+  console.log("  The AI will walk you through the rest \u2014");
   console.log("  detecting your app, connecting to ULink, and");
   console.log("  configuring deep links automatically.");
   console.log();
-}
-
-/**
- * Parse comma-separated numbers into platform IDs.
- * choices is an array of [id, platform] entries.
- * If "All" number is selected, returns all IDs.
- */
-function parseSelection(answer, choices) {
-  const nums = answer
-    .split(",")
-    .map((s) => parseInt(s.trim(), 10))
-    .filter((n) => !isNaN(n));
-
-  if (nums.includes(choices.length + 1)) {
-    return choices.map(([id]) => id);
-  }
-
-  return nums
-    .filter((n) => n >= 1 && n <= choices.length)
-    .map((n) => choices[n - 1][0]);
 }
 
 main().catch((err) => {
