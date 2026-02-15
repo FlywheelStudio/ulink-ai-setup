@@ -9,6 +9,7 @@ import { createInterface } from "node:readline";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILL_SOURCE = join(__dirname, "..", "skills", "setup-ulink");
+const CWD = process.cwd();
 
 // ── MCP server config ───────────────────────────────────────────────
 const MCP_ENTRY = {
@@ -20,16 +21,18 @@ const MCP_ENTRY = {
 const PLATFORMS = {
   "claude-code": {
     name: "Claude Code",
-    detect: () => commandExists("claude"),
-    mcpConfig: null, // plugin bundles MCP via .mcp.json
-    skillDir: null, // plugin bundles skill
+    // Project-level: .claude/ directory in cwd
+    localMarker: () => existsSync(join(CWD, ".claude")),
+    // Env hint: CURSOR_CLI absent + claude CLI exists (best we can do)
+    envHint: () => process.env.CURSOR_CLI == null && commandExists("claude"),
     setup: installClaudePlugin,
   },
   cursor: {
     name: "Cursor",
-    detect: () =>
-      existsSync(join(homedir(), ".cursor")) ||
-      commandExists("cursor"),
+    // Project-level: .cursor/ directory in cwd
+    localMarker: () => existsSync(join(CWD, ".cursor")),
+    // Env hint: Cursor sets CURSOR_CLI in its integrated terminal
+    envHint: () => process.env.CURSOR_CLI != null,
     mcpConfig: join(homedir(), ".cursor", "mcp.json"),
     skillDir: join(homedir(), ".cursor", "skills", "setup-ulink"),
     setup: (cfg) => {
@@ -39,9 +42,10 @@ const PLATFORMS = {
   },
   antigravity: {
     name: "Antigravity",
-    detect: () =>
-      existsSync(join(homedir(), ".gemini", "antigravity")) ||
-      commandExists("antigravity"),
+    // Project-level: .agent/ directory in cwd
+    localMarker: () => existsSync(join(CWD, ".agent")),
+    // Env hint: check for global config dir
+    envHint: () => existsSync(join(homedir(), ".gemini", "antigravity")),
     mcpConfig: join(homedir(), ".gemini", "antigravity", "mcp_config.json"),
     skillDir: join(homedir(), ".gemini", "antigravity", "skills", "setup-ulink"),
     setup: (cfg) => {
@@ -129,6 +133,39 @@ function prompt(rl, question) {
   return new Promise((resolve) => rl.question(question, resolve));
 }
 
+/**
+ * Detection priority:
+ * 1. Check current directory for tool config folders (.claude/, .cursor/, .agent/)
+ * 2. If nothing found locally, check env hints (running inside a tool's terminal)
+ * 3. If still nothing, ask the user
+ */
+function detectPlatforms() {
+  // 1. Local project markers
+  const local = [];
+  for (const [id, platform] of Object.entries(PLATFORMS)) {
+    if (platform.localMarker()) {
+      local.push(id);
+    }
+  }
+  if (local.length > 0) {
+    return { ids: local, source: "project" };
+  }
+
+  // 2. Environment / global hints
+  const env = [];
+  for (const [id, platform] of Object.entries(PLATFORMS)) {
+    if (platform.envHint()) {
+      env.push(id);
+    }
+  }
+  if (env.length > 0) {
+    return { ids: env, source: "environment" };
+  }
+
+  // 3. Nothing found
+  return { ids: [], source: "none" };
+}
+
 // ── Main ────────────────────────────────────────────────────────────
 
 async function main() {
@@ -140,26 +177,18 @@ async function main() {
   console.log("  skill for your AI coding assistant.");
   console.log();
 
-  // Detect platforms
-  const detected = [];
-  for (const [id, platform] of Object.entries(PLATFORMS)) {
-    if (platform.detect()) {
-      detected.push(id);
-    }
-  }
-
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
   let selected = [];
+  const { ids: detected, source } = detectPlatforms();
 
   if (detected.length === 0) {
-    console.log("  No supported AI tools detected.");
-    console.log("  Supported: Claude Code, Cursor, Antigravity");
-    console.log();
-    console.log("  Choose which to configure:");
+    // Nothing detected — ask the user
+    console.log("  No AI tools detected in this project.");
+    console.log("  Which tool would you like to set up?");
     console.log();
     const choices = Object.entries(PLATFORMS);
     choices.forEach(([, p], i) => console.log(`    ${i + 1}. ${p.name}`));
@@ -180,21 +209,29 @@ async function main() {
         .map((n) => choices[n - 1][0]);
     }
   } else if (detected.length === 1) {
-    console.log(`  Detected: ${PLATFORMS[detected[0]].name}`);
+    const hint =
+      source === "project"
+        ? `Found .${detected[0] === "claude-code" ? "claude" : detected[0] === "cursor" ? "cursor" : "agent"}/ in this project`
+        : `Detected ${PLATFORMS[detected[0]].name}`;
+    console.log(`  ${hint}`);
     console.log();
-    const answer = await prompt(rl, "  Set up ULink for this tool? (Y/n) ");
+    const answer = await prompt(
+      rl,
+      `  Set up ULink for ${PLATFORMS[detected[0]].name}? (Y/n) `
+    );
     if (answer.toLowerCase() === "n") {
       rl.close();
       return;
     }
     selected = detected;
   } else {
-    console.log("  Detected:");
+    const label = source === "project" ? "Found in this project" : "Detected";
+    console.log(`  ${label}:`);
     detected.forEach((id) => console.log(`    - ${PLATFORMS[id].name}`));
     console.log();
     const answer = await prompt(
       rl,
-      "  Set up ULink for all detected tools? (Y/n) "
+      "  Set up ULink for all of these? (Y/n) "
     );
     if (answer.toLowerCase() === "n") {
       console.log();
