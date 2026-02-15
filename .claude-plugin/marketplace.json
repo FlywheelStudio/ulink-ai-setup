@@ -1,0 +1,10 @@
+{
+  "name": "ulink",
+  "description": "Official ULink plugins for Claude Code",
+  "plugins": [
+    {
+      "name": "ulink-onboarding",
+      "path": "."
+    }
+  ]
+}
