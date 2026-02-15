@@ -7,9 +7,6 @@ user-invocable: true
 
 ## Dynamic Context
 
-Project files:
-!`ls pubspec.yaml build.gradle.kts build.gradle settings.gradle.kts settings.gradle Podfile Package.swift 2>/dev/null`
-
 Current directory:
 !`pwd`
 
@@ -37,15 +34,15 @@ Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
 
 ### 1b. CLI
 
-Check the dynamic context above for the ULink CLI version.
+Run `which ulink` to check if the ULink CLI is installed.
 
-- If it shows `NOT_INSTALLED`, tell the user:
+- If the command returns nothing (CLI not found), tell the user:
   > The ULink CLI is not installed. You can install it with:
   > ```
   > curl -fsSL https://ulink.ly/install.sh | bash
   > ```
   > The CLI is needed for verification in Phase 6. You can continue setup now and install it before verification.
-- If installed, note the version and continue.
+- If installed, continue.
 
 ### 1c. Authentication
 
@@ -63,7 +60,7 @@ If `list_projects` returned an authentication error (401, unauthorized, token ex
 
 ## Phase 2 — Detect Local Project
 
-Use the dynamic context (project files listing), the Glob tool (e.g., `*.xcodeproj` and `*.xcworkspace`), and file reads to determine the project type. Apply the **first matching** rule:
+Use the Glob tool to scan for project markers (`pubspec.yaml`, `build.gradle`, `build.gradle.kts`, `*.xcodeproj`, `*.xcworkspace`, `Podfile`, `Package.swift`) and file reads to determine the project type. Apply the **first matching** rule:
 
 ### Detection Rules
 
@@ -93,7 +90,7 @@ Use the dynamic context (project files listing), the Glob tool (e.g., `*.xcodepr
 
 ### No Project Detected
 
-If the dynamic context shows `NO_PROJECT_FILES_FOUND` or no rule matches:
+If no project markers are found (no rule matches):
 
 > No mobile project detected in the current directory. Please `cd` to your Flutter, iOS, or Android project root and run `/setup-ulink` again.
 
