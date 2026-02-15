@@ -1,6 +1,6 @@
 {
   "name": "@ulinkly/setup",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Set up ULink deep linking with your AI coding assistant (Claude Code, Cursor, Antigravity)",
   "type": "module",
   "bin": {

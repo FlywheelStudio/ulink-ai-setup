@@ -9,7 +9,6 @@ import { createInterface } from "node:readline";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILL_SOURCE = join(__dirname, "..", "skills", "setup-ulink");
-const CWD = process.cwd();
 
 // ── MCP server config ───────────────────────────────────────────────
 const MCP_ENTRY = {
@@ -21,18 +20,13 @@ const MCP_ENTRY = {
 const PLATFORMS = {
   "claude-code": {
     name: "Claude Code",
-    // Project-level: .claude/ directory in cwd
-    localMarker: () => existsSync(join(CWD, ".claude")),
-    // Env hint: CURSOR_CLI absent + claude CLI exists (best we can do)
-    envHint: () => process.env.CURSOR_CLI == null && commandExists("claude"),
+    detect: () => commandExists("claude"),
     setup: installClaudePlugin,
   },
   cursor: {
     name: "Cursor",
-    // Project-level: .cursor/ directory in cwd
-    localMarker: () => existsSync(join(CWD, ".cursor")),
-    // Env hint: Cursor sets CURSOR_CLI in its integrated terminal
-    envHint: () => process.env.CURSOR_CLI != null,
+    detect: () =>
+      existsSync(join(homedir(), ".cursor")) || commandExists("cursor"),
     mcpConfig: join(homedir(), ".cursor", "mcp.json"),
     skillDir: join(homedir(), ".cursor", "skills", "setup-ulink"),
     setup: (cfg) => {
@@ -42,10 +36,9 @@ const PLATFORMS = {
   },
   antigravity: {
     name: "Antigravity",
-    // Project-level: .agent/ directory in cwd
-    localMarker: () => existsSync(join(CWD, ".agent")),
-    // Env hint: check for global config dir
-    envHint: () => existsSync(join(homedir(), ".gemini", "antigravity")),
+    detect: () =>
+      existsSync(join(homedir(), ".gemini", "antigravity")) ||
+      commandExists("antigravity"),
     mcpConfig: join(homedir(), ".gemini", "antigravity", "mcp_config.json"),
     skillDir: join(homedir(), ".gemini", "antigravity", "skills", "setup-ulink"),
     setup: (cfg) => {
@@ -133,39 +126,6 @@ function prompt(rl, question) {
   return new Promise((resolve) => rl.question(question, resolve));
 }
 
-/**
- * Detection priority:
- * 1. Check current directory for tool config folders (.claude/, .cursor/, .agent/)
- * 2. If nothing found locally, check env hints (running inside a tool's terminal)
- * 3. If still nothing, ask the user
- */
-function detectPlatforms() {
-  // 1. Local project markers
-  const local = [];
-  for (const [id, platform] of Object.entries(PLATFORMS)) {
-    if (platform.localMarker()) {
-      local.push(id);
-    }
-  }
-  if (local.length > 0) {
-    return { ids: local, source: "project" };
-  }
-
-  // 2. Environment / global hints
-  const env = [];
-  for (const [id, platform] of Object.entries(PLATFORMS)) {
-    if (platform.envHint()) {
-      env.push(id);
-    }
-  }
-  if (env.length > 0) {
-    return { ids: env, source: "environment" };
-  }
-
-  // 3. Nothing found
-  return { ids: [], source: "none" };
-}
-
 // ── Main ────────────────────────────────────────────────────────────
 
 async function main() {
@@ -177,78 +137,60 @@ async function main() {
   console.log("  skill for your AI coding assistant.");
   console.log();
 
+  // Detect installed tools system-wide
+  const detected = [];
+  for (const [id, platform] of Object.entries(PLATFORMS)) {
+    if (platform.detect()) {
+      detected.push(id);
+    }
+  }
+
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
   let selected = [];
-  const { ids: detected, source } = detectPlatforms();
+  const allChoices = Object.entries(PLATFORMS);
 
   if (detected.length === 0) {
-    // Nothing detected — ask the user
-    console.log("  No AI tools detected in this project.");
-    console.log("  Which tool would you like to set up?");
+    // Nothing detected — show all options
+    console.log("  No AI tools detected on this system.");
+    console.log("  Which tool(s) would you like to set up?");
     console.log();
-    const choices = Object.entries(PLATFORMS);
-    choices.forEach(([, p], i) => console.log(`    ${i + 1}. ${p.name}`));
-    console.log(`    ${choices.length + 1}. All`);
+    allChoices.forEach(([, p], i) => console.log(`    ${i + 1}. ${p.name}`));
+    console.log(`    ${allChoices.length + 1}. All`);
     console.log();
 
     const answer = await prompt(rl, "  Enter number(s), comma-separated: ");
-    const nums = answer
-      .split(",")
-      .map((s) => parseInt(s.trim(), 10))
-      .filter((n) => !isNaN(n));
-
-    if (nums.includes(choices.length + 1)) {
-      selected = choices.map(([id]) => id);
-    } else {
-      selected = nums
-        .filter((n) => n >= 1 && n <= choices.length)
-        .map((n) => choices[n - 1][0]);
-    }
-  } else if (detected.length === 1) {
-    const hint =
-      source === "project"
-        ? `Found .${detected[0] === "claude-code" ? "claude" : detected[0] === "cursor" ? "cursor" : "agent"}/ in this project`
-        : `Detected ${PLATFORMS[detected[0]].name}`;
-    console.log(`  ${hint}`);
-    console.log();
-    const answer = await prompt(
-      rl,
-      `  Set up ULink for ${PLATFORMS[detected[0]].name}? (Y/n) `
-    );
-    if (answer.toLowerCase() === "n") {
-      rl.close();
-      return;
-    }
-    selected = detected;
+    selected = parseSelection(answer, allChoices);
   } else {
-    const label = source === "project" ? "Found in this project" : "Detected";
-    console.log(`  ${label}:`);
-    detected.forEach((id) => console.log(`    - ${PLATFORMS[id].name}`));
-    console.log();
-    const answer = await prompt(
-      rl,
-      "  Set up ULink for all of these? (Y/n) "
+    // Show detected tools and let user pick
+    console.log("  Detected on this system:");
+    detected.forEach((id, i) =>
+      console.log(`    ${i + 1}. ${PLATFORMS[id].name}`)
     );
-    if (answer.toLowerCase() === "n") {
-      console.log();
-      detected.forEach((id, i) =>
-        console.log(`    ${i + 1}. ${PLATFORMS[id].name}`)
+    console.log();
+
+    if (detected.length === 1) {
+      const answer = await prompt(
+        rl,
+        `  Set up ULink for ${PLATFORMS[detected[0]].name}? (Y/n) `
       );
-      console.log();
-      const pick = await prompt(rl, "  Enter number(s), comma-separated: ");
-      const nums = pick
-        .split(",")
-        .map((s) => parseInt(s.trim(), 10))
-        .filter((n) => !isNaN(n));
-      selected = nums
-        .filter((n) => n >= 1 && n <= detected.length)
-        .map((n) => detected[n - 1]);
-    } else {
+      if (answer.toLowerCase() === "n") {
+        rl.close();
+        return;
+      }
       selected = detected;
+    } else {
+      console.log(`    ${detected.length + 1}. All`);
+      console.log();
+      const answer = await prompt(
+        rl,
+        "  Which tool(s)? Enter number(s), comma-separated: "
+      );
+      const detectedChoices = detected.map((id) => [id, PLATFORMS[id]]);
+      selected = parseSelection(answer, detectedChoices);
     }
   }
 
@@ -301,6 +243,26 @@ async function main() {
   console.log("  detecting your app, connecting to ULink, and");
   console.log("  configuring deep links automatically.");
   console.log();
+}
+
+/**
+ * Parse comma-separated numbers into platform IDs.
+ * choices is an array of [id, platform] entries.
+ * If "All" number is selected, returns all IDs.
+ */
+function parseSelection(answer, choices) {
+  const nums = answer
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => !isNaN(n));
+
+  if (nums.includes(choices.length + 1)) {
+    return choices.map(([id]) => id);
+  }
+
+  return nums
+    .filter((n) => n >= 1 && n <= choices.length)
+    .map((n) => choices[n - 1][0]);
 }
 
 main().catch((err) => {
