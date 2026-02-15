@@ -11,11 +11,15 @@ vi.mock("node:fs", () => ({
 }));
 
 vi.mock("node:child_process", () => ({
-  execSync: vi.fn(),
+  execFileSync: vi.fn(),
+}));
+
+vi.mock("node:os", () => ({
+  homedir: vi.fn(() => "/mock-home"),
 }));
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 beforeEach(() => {
   vi.spyOn(console, "log").mockImplementation(() => {});
@@ -23,30 +27,53 @@ beforeEach(() => {
 
 // ── MCP_ENTRY ───────────────────────────────────────────────────────
 describe("MCP_ENTRY", () => {
-  it("has the expected command and args", () => {
+  it("has a pinned version (not @latest)", () => {
     expect(MCP_ENTRY).toEqual({
       command: "npx",
-      args: ["-y", "@ulinkly/mcp-server@latest"],
+      args: ["-y", expect.stringMatching(/^@ulinkly\/mcp-server@\d+\.\d+\.\d+$/)],
     });
+    // Must NOT use @latest — supply chain risk
+    expect(MCP_ENTRY.args[1]).not.toContain("@latest");
   });
 });
 
 // ── commandExists ───────────────────────────────────────────────────
 describe("commandExists", () => {
-  it("returns true when execSync succeeds", () => {
-    execSync.mockReturnValue(Buffer.from(""));
+  it("returns true for allowed commands when execFileSync succeeds", () => {
+    execFileSync.mockReturnValue(Buffer.from(""));
     expect(commandExists("node")).toBe(true);
-    expect(execSync).toHaveBeenCalledWith(
-      "which node 2>/dev/null || where node 2>nul",
+    // Should use execFileSync (no shell) not execSync
+    expect(execFileSync).toHaveBeenCalledWith(
+      "which",
+      ["node"],
       { stdio: "ignore" }
     );
   });
 
-  it("returns false when execSync throws", () => {
-    execSync.mockImplementation(() => {
+  it("returns false when execFileSync throws", () => {
+    execFileSync.mockImplementation(() => {
       throw new Error("not found");
     });
-    expect(commandExists("nonexistent")).toBe(false);
+    expect(commandExists("ulink")).toBe(false);
+  });
+
+  it("rejects commands not in the allowlist (prevents injection)", () => {
+    // These should be rejected without even calling execFileSync
+    expect(commandExists("rm")).toBe(false);
+    expect(commandExists("cat")).toBe(false);
+    expect(commandExists("; rm -rf /")).toBe(false);
+    expect(commandExists("node; echo pwned")).toBe(false);
+    expect(commandExists("")).toBe(false);
+    // execFileSync should NOT have been called for disallowed commands
+    expect(execFileSync).not.toHaveBeenCalled();
+  });
+
+  it("allows all expected commands", () => {
+    execFileSync.mockReturnValue(Buffer.from(""));
+    const allowed = ["ulink", "node", "npx", "npm", "flutter", "xcodebuild", "keytool", "curl"];
+    for (const cmd of allowed) {
+      expect(commandExists(cmd)).toBe(true);
+    }
   });
 });
 
@@ -73,12 +100,25 @@ describe("writeMcpConfig", () => {
     };
     readFileSync.mockReturnValue(JSON.stringify(existing));
 
-    writeMcpConfig("/home/user/.cursor/mcp.json");
+    writeMcpConfig("/mock-home/.cursor/mcp.json");
 
     const written = JSON.parse(writeFileSync.mock.calls[0][1]);
     expect(written.mcpServers.other).toEqual({ command: "other-cmd", args: [] });
     expect(written.mcpServers.ulink).toEqual(MCP_ENTRY);
     expect(written.extraKey).toBe(true);
+  });
+
+  it("redacts home directory in log output", () => {
+    readFileSync.mockImplementation(() => {
+      throw new Error("ENOENT");
+    });
+
+    writeMcpConfig("/mock-home/.cursor/mcp.json");
+
+    // Should log with ~ instead of full home path
+    expect(console.log).toHaveBeenCalledWith(
+      "  MCP config written to ~/.cursor/mcp.json"
+    );
   });
 
   it("overwrites existing ulink entry and logs updating message", () => {
@@ -123,14 +163,15 @@ describe("copySkill", () => {
   it("copies recursively when source exists", () => {
     existsSync.mockReturnValue(true);
 
-    copySkill("/dest/skills", "/source/skills");
+    copySkill("/mock-home/skills", "/source/skills");
 
-    expect(mkdirSync).toHaveBeenCalledWith("/dest/skills", { recursive: true });
-    expect(cpSync).toHaveBeenCalledWith("/source/skills", "/dest/skills", {
+    expect(mkdirSync).toHaveBeenCalledWith("/mock-home/skills", { recursive: true });
+    expect(cpSync).toHaveBeenCalledWith("/source/skills", "/mock-home/skills", {
       recursive: true,
     });
+    // Should redact home directory in log output
     expect(console.log).toHaveBeenCalledWith(
-      "  Skill installed to /dest/skills"
+      "  Skill installed to ~/skills"
     );
   });
 
