@@ -15,7 +15,7 @@
         "repo": "FlywheelStudio/ulink-onboarding-plugin"
       },
       "description": "Guided onboarding for integrating ULink deep linking into iOS, Android, and Flutter projects",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "ULink"
       },
