@@ -12,7 +12,7 @@ export const MCP_ENTRY = {
 // ── Helpers ─────────────────────────────────────────────────────────
 
 // Allowed command names for commandExists — prevents shell injection
-const ALLOWED_COMMANDS = new Set(["ulink", "node", "npx", "npm", "flutter", "xcodebuild", "keytool", "curl"]);
+const ALLOWED_COMMANDS = new Set(["ulink", "node", "npx", "npm", "flutter", "xcodebuild", "keytool", "curl", "claude", "cursor", "antigravity"]);
 
 export function commandExists(cmd) {
   if (!ALLOWED_COMMANDS.has(cmd)) {

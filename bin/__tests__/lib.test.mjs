@@ -77,7 +77,7 @@ describe("commandExists", () => {
 
   it("allows all expected commands", () => {
     execFileSync.mockReturnValue(Buffer.from(""));
-    const allowed = ["ulink", "node", "npx", "npm", "flutter", "xcodebuild", "keytool", "curl"];
+    const allowed = ["ulink", "node", "npx", "npm", "flutter", "xcodebuild", "keytool", "curl", "claude", "cursor", "antigravity"];
     for (const cmd of allowed) {
       expect(commandExists(cmd)).toBe(true);
     }
