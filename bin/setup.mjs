@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { commandExists, writeMcpConfig, copySkill } from "./lib.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -49,8 +49,9 @@ function installClaudePlugin() {
   try {
     console.log("  Adding marketplace...");
     try {
-      execSync(
-        "claude plugin marketplace add FlywheelStudio/ulink-ai-setup",
+      execFileSync(
+        "claude",
+        ["plugin", "marketplace", "add", "FlywheelStudio/ulink-ai-setup"],
         { stdio: "inherit" }
       );
     } catch {
@@ -58,7 +59,7 @@ function installClaudePlugin() {
     }
 
     console.log("  Installing plugin...");
-    execSync("claude plugin install ulink-onboarding@ulink", {
+    execFileSync("claude", ["plugin", "install", "ulink-onboarding@ulink"], {
       stdio: "inherit",
     });
     console.log("  Plugin installed (MCP server + onboarding skill).");

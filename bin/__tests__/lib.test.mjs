@@ -21,8 +21,15 @@ vi.mock("node:os", () => ({
 import { existsSync, readFileSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
+function enoentError(path) {
+  const err = new Error(`ENOENT: no such file or directory, open '${path}'`);
+  err.code = "ENOENT";
+  return err;
+}
+
 beforeEach(() => {
   vi.spyOn(console, "log").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 // ── MCP_ENTRY ───────────────────────────────────────────────────────
@@ -81,7 +88,7 @@ describe("commandExists", () => {
 describe("writeMcpConfig", () => {
   it("creates a new config when file does not exist", () => {
     readFileSync.mockImplementation(() => {
-      throw new Error("ENOENT");
+      throw enoentError("/tmp/test/mcp.json");
     });
 
     writeMcpConfig("/tmp/test/mcp.json");
@@ -110,7 +117,7 @@ describe("writeMcpConfig", () => {
 
   it("redacts home directory in log output", () => {
     readFileSync.mockImplementation(() => {
-      throw new Error("ENOENT");
+      throw enoentError("/mock-home/.cursor/mcp.json");
     });
 
     writeMcpConfig("/mock-home/.cursor/mcp.json");
@@ -138,12 +145,24 @@ describe("writeMcpConfig", () => {
 
   it("creates parent directories recursively", () => {
     readFileSync.mockImplementation(() => {
-      throw new Error("ENOENT");
+      throw enoentError("/deep/nested/dir/mcp.json");
     });
 
     writeMcpConfig("/deep/nested/dir/mcp.json");
 
     expect(mkdirSync).toHaveBeenCalledWith("/deep/nested/dir", { recursive: true });
+  });
+
+  it("warns and starts fresh when config file has invalid JSON", () => {
+    readFileSync.mockReturnValue("not valid json {{{");
+
+    writeMcpConfig("/tmp/mcp.json");
+
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining("Warning: could not parse")
+    );
+    const written = JSON.parse(writeFileSync.mock.calls[0][1]);
+    expect(written.mcpServers.ulink).toEqual(MCP_ENTRY);
   });
 
   it("adds mcpServers key if existing config lacks it", () => {

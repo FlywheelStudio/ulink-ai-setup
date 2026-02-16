@@ -39,8 +39,12 @@ export function writeMcpConfig(configPath) {
     const raw = readFileSync(configPath, "utf-8");
     config = JSON.parse(raw);
     if (!config.mcpServers) config.mcpServers = {};
-  } catch {
-    // File doesn't exist — start fresh
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      // File doesn't exist — start fresh
+    } else {
+      console.warn(`  Warning: could not parse ${redactHome(configPath)}, starting fresh`);
+    }
   }
 
   if (config.mcpServers.ulink) {

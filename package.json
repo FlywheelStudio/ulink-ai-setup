@@ -7,7 +7,7 @@
     "ulink-setup": "./bin/setup.mjs"
   },
   "files": [
-    "bin/",
+    "bin/*.mjs",
     "skills/"
   ],
   "repository": {
