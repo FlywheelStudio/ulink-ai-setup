@@ -31,7 +31,7 @@ Restart Claude Code, then run `/setup-ulink` in your project.
   "mcpServers": {
     "ulink": {
       "command": "npx",
-      "args": ["-y", "@ulinkly/mcp-server@0.1.11"]
+      "args": ["-y", "@ulinkly/mcp-server@0.1.12"]
     }
   }
 }
@@ -50,7 +50,7 @@ Restart Cursor, then ask the agent: **"setup ulink"**.
   "mcpServers": {
     "ulink": {
       "command": "npx",
-      "args": ["-y", "@ulinkly/mcp-server@0.1.11"]
+      "args": ["-y", "@ulinkly/mcp-server@0.1.12"]
     }
   }
 }
