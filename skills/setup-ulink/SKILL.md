@@ -39,7 +39,7 @@ Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
        "mcpServers": {
          "ulink": {
            "command": "npx",
-           "args": ["-y", "@ulinkly/mcp-server@0.1.14"]
+           "args": ["-y", "@ulinkly/mcp-server@0.1.15"]
          }
        }
      }
@@ -51,7 +51,7 @@ Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
        "mcpServers": {
          "ulink": {
            "command": "npx",
-           "args": ["-y", "@ulinkly/mcp-server@0.1.14"]
+           "args": ["-y", "@ulinkly/mcp-server@0.1.15"]
          }
        }
      }
