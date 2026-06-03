@@ -49,7 +49,7 @@ The [`skills/setup-ulink/SKILL.md`](skills/setup-ulink/SKILL.md) file is a stand
   "mcpServers": {
     "ulink": {
       "command": "npx",
-      "args": ["-y", "@ulinkly/mcp-server@latest"]
+      "args": ["-y", "@ulinkly/mcp-server@0.1.17"]
     }
   }
 }
