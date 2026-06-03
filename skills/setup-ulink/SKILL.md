@@ -559,6 +559,9 @@ List every file that was created or edited, with a one-line description of the c
 ### Next Steps
 
 1. **Create your first deep link** — Go to the [ULink Dashboard](https://app.ulink.ly) and create a link under your project.
+
+   **Query-parameter passthrough** (opt-in per link): set `allowQueryPassthrough: true` on link create/update. When enabled, query params appended to the short URL at click time (e.g. `?orderId=123`) are merged into `data.parameters` alongside any stored params — passthrough values override stored ones on key collision and arrive as strings. Works on direct open and after deferred install; no SDK change required. Useful for one reusable link (e.g. `/orders`) that carries per-entity data without creating a link per entity. Validation: keys `[A-Za-z0-9_-]{1,64}`, ≤ 25 params, ≤ 1024 chars/value, ≤ 4 KB total; `debug` is reserved. See [patterns/query-parameter-passthrough](https://docs.ulink.ly/patterns/query-parameter-passthrough).
+
 2. **Initialize the SDK in your app** — See the [SDK documentation](https://docs.ulink.ly/sdk/quickstart) for initialization code.
 3. **Test deep linking** — See the [testing guide](https://docs.ulink.ly/guides/testing-deep-links) for how to test on devices and simulators.
 
