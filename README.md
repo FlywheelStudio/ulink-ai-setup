@@ -14,10 +14,10 @@ Installs the ULink onboarding skill via the [open agent-skills CLI](https://gith
 
 ## What the AI Does
 
-1. **Detect project** — scans your directory to identify Flutter, iOS, or Android
+1. **Detect project** — scans your directory to identify Flutter, React Native, iOS, or Android
 2. **Connect to ULink** — authenticates via MCP and connects to your ULink project
 3. **Select domain** — pick an existing domain or create a new one
-4. **Configure platforms** — sets up Associated Domains (iOS), App Links (Android), or both (Flutter)
+4. **Configure platforms** — sets up Associated Domains (iOS), App Links (Android), or both (Flutter / React Native)
 5. **Edit local files** — proposes changes and applies them only after your approval
 6. **Verify** — runs the ULink CLI to validate your deep link configuration
 7. **Summarize** — shows everything that was configured and next steps
@@ -93,6 +93,7 @@ curl -fsSL https://ulink.ly/install.sh | bash
 ## Supported Platforms
 
 - **Flutter** — detects `pubspec.yaml`, configures iOS + Android
+- **React Native / Expo** — detects `package.json` + `app.json`, configures iOS + Android (Expo config plugin or manual native setup)
 - **Native iOS** — detects Xcode projects, sets up Associated Domains and URL schemes
 - **Native Android** — detects Gradle projects, sets up App Links and intent filters
 
