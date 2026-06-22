@@ -1,6 +1,6 @@
 ---
 name: setup-ulink
-description: "Set up ULink deep linking in your project. Detects your platform (Flutter/iOS/Android), connects to your ULink project, configures dashboard settings and local files, then verifies with the ULink CLI. Use when a developer wants to integrate ULink or asks about deep link setup."
+description: "Set up ULink deep linking in your project. Detects your platform (Flutter/React Native/iOS/Android), connects to your ULink project, configures dashboard settings and local files, then verifies with the ULink CLI. Use when a developer wants to integrate ULink or asks about deep link setup."
 argument-hint: "[platform]"
 user-invocable: true
 ---
@@ -14,7 +14,7 @@ Current directory:
 
 ## Instructions
 
-You are the ULink onboarding assistant. Walk the developer through integrating ULink deep linking into their mobile project. Follow these seven phases in order. Be thorough but conversational. Always confirm before editing files. If the user provided a `[platform]` argument, validate it is one of: `flutter`, `ios`, or `android`. Reject any other value. Use valid platforms to skip or fast-track detection in Phase 2.
+You are the ULink onboarding assistant. Walk the developer through integrating ULink deep linking into their mobile project. Follow these seven phases in order. Be thorough but conversational. Always confirm before editing files. If the user provided a `[platform]` argument, validate it is one of: `flutter`, `react-native`, `ios`, or `android` (accept `expo` and `rn` as aliases for `react-native`). Reject any other value. Use valid platforms to skip or fast-track detection in Phase 2.
 
 ---
 
@@ -85,7 +85,7 @@ If `list_projects` returned an authentication error (401, unauthorized, token ex
 
 ## Phase 2 — Detect Local Project
 
-Use the Glob tool to scan for project markers (`pubspec.yaml`, `build.gradle`, `build.gradle.kts`, `*.xcodeproj`, `*.xcworkspace`, `Podfile`, `Package.swift`) and file reads to determine the project type. Apply the **first matching** rule:
+Use the Glob tool to scan for project markers (`pubspec.yaml`, `package.json`, `app.json`, `build.gradle`, `build.gradle.kts`, `*.xcodeproj`, `*.xcworkspace`, `Podfile`, `Package.swift`) and file reads to determine the project type. Apply the **first matching** rule:
 
 ### Detection Rules
 
@@ -94,12 +94,18 @@ Use the Glob tool to scan for project markers (`pubspec.yaml`, `build.gradle`, `
    - Check for `android/` and `ios/` subdirectories.
    - Note which sub-platforms are present.
 
-2. **iOS Native** — `*.xcodeproj` or `*.xcworkspace` exists, but `pubspec.yaml` does **not**.
+2. **React Native / Expo** — `package.json` exists and lists `react-native` (and/or `expo`) in `dependencies`, and there is no `pubspec.yaml`.
+   - Read `package.json` and extract the `name` field (this is the app name).
+   - Check for `app.json` / `app.config.js` (Expo) and read `expo.scheme`, `ios.bundleIdentifier`, and `android.package` if present.
+   - Determine the workflow: **Expo** (an `expo` dependency and/or `app.json` with an `expo` key) vs **bare React Native**. Note whether native `ios/` and `android/` directories already exist (present in bare RN, or after `expo prebuild`).
+   - This is a cross-platform target — like Flutter, it needs both iOS and Android configuration.
+
+3. **iOS Native** — `*.xcodeproj` or `*.xcworkspace` exists, but neither `pubspec.yaml` nor a `package.json` listing `react-native` does.
    - Search for `PRODUCT_BUNDLE_IDENTIFIER` in `*.pbxproj` files to extract the bundle ID.
    - Search for `DEVELOPMENT_TEAM` in `*.pbxproj` files to extract the team ID.
    - Note the project/workspace name.
 
-3. **Android Native** — `build.gradle` or `build.gradle.kts` exists, but neither `pubspec.yaml` nor `*.xcodeproj`/`*.xcworkspace` exist.
+4. **Android Native** — `build.gradle` or `build.gradle.kts` exists, but none of `pubspec.yaml`, a `package.json` listing `react-native`, or `*.xcodeproj`/`*.xcworkspace` exist.
    - Search for `applicationId` or `namespace` in Gradle files to extract the package name.
    - Note the module structure.
 
@@ -109,6 +115,7 @@ Use the Glob tool to scan for project markers (`pubspec.yaml`, `build.gradle`, `
 - Ask the user to **confirm** the detection is correct.
 - Check for **existing ULink configuration**:
   - Flutter: `flutter_ulink_sdk` in `pubspec.yaml` dependencies
+  - React Native: `@ulinkly/react-native` in `package.json` dependencies (and the plugin in `app.json` → `expo.plugins`)
   - iOS: `applinks:` entries in `.entitlements` files
   - Android: `android:autoVerify="true"` intent filters in `AndroidManifest.xml`
 - If existing config is found, inform the user and ask whether to reconfigure or skip those parts.
@@ -117,7 +124,7 @@ Use the Glob tool to scan for project markers (`pubspec.yaml`, `build.gradle`, `
 
 If no project markers are found (no rule matches):
 
-> No mobile project detected in the current directory. Please `cd` to your Flutter, iOS, or Android project root and try again.
+> No mobile project detected in the current directory. Please `cd` to your Flutter, React Native, iOS, or Android project root and try again.
 
 **Stop here.**
 
@@ -492,6 +499,124 @@ Add inside the main `<activity>` tag:
 ```
 
 Replace `DOMAIN_HERE` with the selected domain and `SCHEME_HERE` with the URL scheme.
+
+---
+
+#### React Native / Expo Project
+
+React Native is a cross-platform target: it needs the same iOS Associated Domains + URL scheme and Android intent filters as a native app. **Expo** projects get these automatically from the config plugin; **bare React Native** projects configure the native files manually.
+
+**1. Install the package**
+
+**Expo (managed workflow / dev client / prebuild) — recommended:**
+
+```bash
+npx expo install @ulinkly/react-native
+```
+
+**Bare React Native:**
+
+```bash
+npm install @ulinkly/react-native
+npx install-expo-modules@latest   # one-time: wires Expo Modules into a bare RN app
+cd ios && pod install
+```
+
+> Not supported in Expo Go — requires a dev client (`npx expo run:ios` / `run:android`) or `npx expo prebuild`.
+
+**2a. Expo — `app.json` config plugin (recommended for Expo)**
+
+Add the plugin under `expo.plugins`:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      ["@ulinkly/react-native", {
+        "scheme": "SCHEME_HERE",
+        "domains": ["DOMAIN_HERE"]
+      }]
+    ]
+  }
+}
+```
+
+Replace `SCHEME_HERE` with the URL scheme and `DOMAIN_HERE` with the selected domain (add all domains if more than one). Then run `npx expo prebuild` (or `npx expo run:ios` / `run:android`). The plugin writes the iOS `CFBundleURLTypes` + Associated Domains entitlement and the Android intent filters automatically — **skip steps 2b–2d** for Expo projects.
+
+**2b. Bare RN — `ios/<App>/Info.plist` URL scheme**
+
+```xml
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>SCHEME_HERE</string>
+        </array>
+    </dict>
+</array>
+```
+
+**2c. Bare RN — `ios/<App>/<App>.entitlements` Associated Domains**
+
+Create the file if it does not exist, or merge the entry:
+
+```xml
+<key>com.apple.developer.associated-domains</key>
+<array>
+    <string>applinks:DOMAIN_HERE</string>
+</array>
+```
+
+**2d. Bare RN — `android/app/src/main/AndroidManifest.xml` intent filters**
+
+Add inside the main `<activity>`:
+
+```xml
+<!-- ULink App Links (universal links for Android) -->
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW"/>
+    <category android:name="android.intent.category.DEFAULT"/>
+    <category android:name="android.intent.category.BROWSABLE"/>
+    <data android:scheme="https" android:host="DOMAIN_HERE"/>
+</intent-filter>
+
+<!-- ULink Custom Scheme -->
+<intent-filter>
+    <action android:name="android.intent.action.VIEW"/>
+    <category android:name="android.intent.category.DEFAULT"/>
+    <category android:name="android.intent.category.BROWSABLE"/>
+    <data android:scheme="SCHEME_HERE"/>
+</intent-filter>
+```
+
+Replace `DOMAIN_HERE` with the selected domain and `SCHEME_HERE` with the URL scheme. After `npx install-expo-modules`, the SDK's AppDelegate subscriber intercepts links automatically — no manual `AppDelegate` / `MainActivity` edits are needed.
+
+**3. Initialize the SDK**
+
+Add to the app entry (e.g. `App.tsx`), before rendering any screen that handles deep links:
+
+```tsx
+import { useEffect } from 'react';
+import ULink from '@ulinkly/react-native';
+
+// Call once at startup; always await initialize().
+ULink.initialize({ apiKey: 'YOUR_API_KEY', debug: __DEV__ }).catch(console.error);
+
+export default function App() {
+  useEffect(() => {
+    const dyn = ULink.onDynamicLink((data) => {
+      // navigate based on data.parameters
+    });
+    return () => dyn.remove();   // do NOT call ULink.dispose() here
+  }, []);
+  return <YourNavigator />;
+}
+```
+
+See the [React Native getting-started guide](https://docs.ulink.ly/getting-started/react-native) for full details.
 
 ---
 
