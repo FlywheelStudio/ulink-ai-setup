@@ -62,16 +62,19 @@ Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
 
 ### 1b. CLI
 
-Run `which ulink` to check if the ULink CLI is installed.
+The verification step (Phase 6) needs the ULink CLI. There are two ways to run it — prefer the zero-install option:
 
-- If the command returns nothing (CLI not found), ask the user:
-  > The ULink CLI is not installed. It's needed for verification in Phase 6. Would you like me to install it now?
-  If the user agrees, run:
-  ```bash
-  curl -fsSL https://ulink.ly/install.sh | bash
-  ```
-  Then verify with `which ulink` again. If the user declines, note that the CLI must be installed before Phase 6 and continue.
-- If installed, continue.
+- **Zero-install via npm (preferred):** if Node.js is available (`which npx` returns a path), nothing needs to be installed — verification will run as `npx -y @ulinkly/cli verify -v`. Continue.
+- **Native binary:** run `which ulink`. If it returns a path, you can use `ulink verify -v` directly. Continue.
+
+If neither Node.js nor a native `ulink` is available, ask the user:
+> The ULink CLI is needed for verification in Phase 6, and Node.js isn't available to run it via npx. Would you like me to install the native CLI now?
+
+If the user agrees, run:
+```bash
+curl -fsSL https://ulink.ly/install.sh | bash
+```
+Then verify with `which ulink` again. If the user declines, note that Node.js (for `npx`) or the native CLI must be available before Phase 6 and continue.
 
 ### 1c. Authentication
 
@@ -624,23 +627,25 @@ See the [React Native getting-started guide](https://docs.ulink.ly/getting-start
 
 ### 6a. Run Verification
 
-Run the ULink CLI verification command:
+Run the ULink CLI verification command. Use whichever is available (prefer the zero-install npm form):
 
 ```bash
+# Zero-install via npm (preferred when Node.js is available):
+npx -y @ulinkly/cli verify -v
+
+# Or, if the native binary is installed:
 ulink verify -v
 ```
 
-If the CLI is not installed, remind the user to install it:
+If neither runs (no Node.js and no native CLI), install the native binary and retry:
 
 ```bash
 curl -fsSL https://ulink.ly/install.sh | bash
 ```
 
-Then retry.
-
 ### 6b. Parse Results
 
-Read the output of `ulink verify -v` and present the results:
+Read the verification output and present the results:
 
 - **Passing checks** — list them briefly.
 - **Failing checks** — list each failure with a clear explanation and offer to fix it.
@@ -653,7 +658,7 @@ Common fixable issues:
 
 ### 6c. Re-verify
 
-After applying fixes, run `ulink verify -v` again. Repeat until:
+After applying fixes, run the verification command again. Repeat until:
 - All checks pass, OR
 - Only non-fixable items remain (DNS propagation, production keystore not available), OR
 - The user chooses to stop

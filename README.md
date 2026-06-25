@@ -84,7 +84,13 @@ Then run `/setup-ulink` in your project. Equivalent to the one-liner above for C
 
 ## ULink CLI
 
-The skill uses the [ULink CLI](https://docs.ulink.ly/getting-started/overview) for verification. If not installed, the skill will offer to install it for you:
+The skill uses the [ULink CLI](https://docs.ulink.ly/getting-started/overview) for verification. When Node.js is available it runs zero-install via npm — no setup required:
+
+```bash
+npx -y @ulinkly/cli verify -v
+```
+
+Otherwise the skill will offer to install the native binary for you:
 
 ```bash
 curl -fsSL https://ulink.ly/install.sh | bash
