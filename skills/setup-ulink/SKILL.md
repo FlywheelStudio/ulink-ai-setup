@@ -276,7 +276,7 @@ Then call the `configure_project` MCP tool with the confirmed settings:
 Add under `dependencies:`:
 
 ```yaml
-  flutter_ulink_sdk: ^0.2.9
+  flutter_ulink_sdk: ^0.3.7
 ```
 
 Then run:
@@ -375,7 +375,7 @@ Replace `BUNDLE_ID_HERE` with the iOS bundle ID and `SCHEME_HERE` with the URL s
 Add to `Podfile`:
 
 ```ruby
-pod 'ULinkSDK', '~> 1.0'
+pod 'ULinkSDK', '~> 1.2.0'
 ```
 
 Then run:
@@ -458,7 +458,7 @@ func application(
 
 ```groovy
 dependencies {
-    implementation 'ly.ulink:ulink-sdk:1.0.8'
+    implementation 'ly.ulink:ulink-sdk:1.2.0'
 }
 ```
 
@@ -466,7 +466,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("ly.ulink:ulink-sdk:1.0.8")
+    implementation("ly.ulink:ulink-sdk:1.2.0")
 }
 ```
 
