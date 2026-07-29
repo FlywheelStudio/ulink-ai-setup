@@ -375,7 +375,7 @@ Replace `BUNDLE_ID_HERE` with the iOS bundle ID and `SCHEME_HERE` with the URL s
 Add to `Podfile`:
 
 ```ruby
-pod 'ULinkSDK', '~> 1.2.0'
+pod 'ULinkSDK', '~> 1.2.1'
 ```
 
 Then run:
