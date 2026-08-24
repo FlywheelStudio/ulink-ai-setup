@@ -1,6 +1,6 @@
 ---
 name: setup-ulink
-description: "Set up ULink deep linking in your project. Detects your platform (Flutter/React Native/iOS/Android), connects to your ULink project, configures dashboard settings and local files, then verifies with the ULink CLI. Use when a developer wants to integrate ULink or asks about deep link setup."
+description: "Set up or repair ULink deep linking for Flutter, React Native/Expo, iOS, or Android. Use for Universal Links, Android App Links, deferred deep linking, referral or invite links, app-install routing, or Firebase Dynamic Links migrations. Connects to a ULink project, configures dashboard and local files, then verifies with the ULink CLI. Do not use for web-only URL shorteners or projects without a mobile target."
 argument-hint: "[platform]"
 user-invocable: true
 ---
