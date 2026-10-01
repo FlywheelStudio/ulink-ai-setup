@@ -1,9 +1,9 @@
 {
   "name": "ulink-onboarding",
   "version": "0.1.3",
-  "description": "Guided onboarding for integrating ULink deep linking into iOS, Android, and Flutter projects",
+  "description": "Guided onboarding for integrating Ulinkly deep linking into iOS, Android, and Flutter projects",
   "author": {
-    "name": "ULink",
+    "name": "Ulinkly",
     "url": "https://ulink.ly"
   },
   "homepage": "https://docs.ulink.ly/getting-started/ai-setup",

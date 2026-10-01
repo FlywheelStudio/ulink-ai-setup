@@ -1,6 +1,6 @@
-# ULink AI Setup
+# Ulinkly AI Setup
 
-> One-command AI-assisted setup for ULink deep linking. Works with Claude Code, Cursor, Codex, OpenCode, and 50+ other AI coding tools.
+> One-command AI-assisted setup for Ulinkly deep linking. Works with Claude Code, Cursor, Codex, OpenCode, and 50+ other AI coding tools.
 
 ## Quick Start
 
@@ -8,18 +8,18 @@
 npx skills add https://ulink.ly
 ```
 
-Installs the ULink onboarding skill via the [open agent-skills CLI](https://github.com/vercel-labs/skills). Then open your AI assistant in your project directory and ask it to **"setup ulink"** — the agent walks you through detecting your platform, connecting to your ULink project, configuring dashboard settings, editing local files, and verifying deep links.
+Installs the Ulinkly onboarding skill via the [open agent-skills CLI](https://github.com/vercel-labs/skills). Then open your AI assistant in your project directory and ask it to **"setup ulink"** — the agent walks you through detecting your platform, connecting to your Ulinkly project, configuring dashboard settings, editing local files, and verifying deep links.
 
 > **Heads up — keep the `https://`.** The agent-skills CLI parses bare hostnames as GitHub shorthand. `npx skills add ulink.ly` will fail with a clone error; `npx skills add https://ulink.ly` triggers the well-known endpoint correctly.
 
 ## What the AI Does
 
 1. **Detect project** — scans your directory to identify Flutter, React Native, iOS, or Android
-2. **Connect to ULink** — authenticates via MCP and connects to your ULink project
+2. **Connect to Ulinkly** — authenticates via MCP and connects to your Ulinkly project
 3. **Select domain** — pick an existing domain or create a new one
 4. **Configure platforms** — sets up Associated Domains (iOS), App Links (Android), or both (Flutter / React Native)
 5. **Edit local files** — proposes changes and applies them only after your approval
-6. **Verify** — runs the ULink CLI to validate your deep link configuration
+6. **Verify** — runs the Ulinkly CLI to validate your deep link configuration
 7. **Summarize** — shows everything that was configured and next steps
 
 ## Alternative installs
@@ -42,7 +42,7 @@ Older one-liner with narrower agent support. Prefer `npx skills add https://ulin
 
 ### Manual setup per agent
 
-The [`skills/setup-ulink/SKILL.md`](skills/setup-ulink/SKILL.md) file is a standard agent-skills SKILL.md — copy it into your agent's skills directory, and add the ULink MCP server to that agent's MCP config:
+The [`skills/setup-ulink/SKILL.md`](skills/setup-ulink/SKILL.md) file is a standard agent-skills SKILL.md — copy it into your agent's skills directory, and add the Ulinkly MCP server to that agent's MCP config:
 
 ```json
 {
@@ -82,9 +82,9 @@ Then run `/setup-ulink` in your project. Equivalent to the one-liner above for C
 | npm | `npx @ulinkly/setup` *(legacy installer)* |
 | Claude Code marketplace | `claude plugin install ulink-onboarding@ulink` |
 
-## ULink CLI
+## Ulinkly CLI
 
-The skill uses the [ULink CLI](https://docs.ulink.ly/getting-started/overview) for verification. When Node.js is available it runs zero-install via npm — no setup required:
+The skill uses the [Ulinkly CLI](https://docs.ulink.ly/getting-started/overview) for verification. When Node.js is available it runs zero-install via npm — no setup required:
 
 ```bash
 npx -y @ulinkly/cli verify -v
@@ -106,7 +106,7 @@ curl -fsSL https://ulink.ly/install.sh | bash
 ## Links
 
 - [Documentation](https://docs.ulink.ly/getting-started/ai-setup)
-- [ULink dashboard](https://ulink.ly/dashboard)
+- [Ulinkly dashboard](https://ulink.ly/dashboard)
 - [Open agent-skills CLI (vercel-labs/skills)](https://github.com/vercel-labs/skills)
 
 ## License

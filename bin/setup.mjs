@@ -45,7 +45,7 @@ const PLATFORMS = {
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function installClaudePlugin() {
-  console.log("  Installing ULink plugin (includes MCP server + onboarding skill)...");
+  console.log("  Installing Ulinkly plugin (includes MCP server + onboarding skill)...");
   try {
     console.log("  Adding marketplace...");
     try {
@@ -165,10 +165,10 @@ function checkbox(title, items) {
 
 async function main() {
   console.log();
-  console.log("  ULink AI Setup");
-  console.log("  ==============");
+  console.log("  Ulinkly AI Setup");
+  console.log("  ================");
   console.log();
-  console.log("  This will configure the ULink MCP server and onboarding");
+  console.log("  This will configure the Ulinkly MCP server and onboarding");
   console.log("  skill for your AI coding assistant.");
   console.log();
 
@@ -239,7 +239,7 @@ async function main() {
   }
 
   console.log("  The AI will walk you through the rest \u2014");
-  console.log("  detecting your app, connecting to ULink, and");
+  console.log("  detecting your app, connecting to Ulinkly, and");
   console.log("  configuring deep links automatically.");
   console.log();
 }

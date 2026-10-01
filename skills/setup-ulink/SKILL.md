@@ -1,6 +1,6 @@
 ---
 name: setup-ulink
-description: "Set up or repair ULink deep linking for Flutter, React Native/Expo, iOS, or Android. Use for Universal Links, Android App Links, deferred deep linking, referral or invite links, app-install routing, or Firebase Dynamic Links migrations. Connects to a ULink project, configures dashboard and local files, then verifies with the ULink CLI. Do not use for web-only URL shorteners or projects without a mobile target."
+description: "Set up or repair Ulinkly deep linking for Flutter, React Native/Expo, iOS, or Android. Use for Universal Links, Android App Links, deferred deep linking, referral or invite links, app-install routing, or Firebase Dynamic Links migrations. Connects to a Ulinkly project, configures dashboard and local files, then verifies with the Ulinkly CLI. Do not use for web-only URL shorteners or projects without a mobile target."
 argument-hint: "[platform]"
 user-invocable: true
 ---
@@ -20,7 +20,7 @@ Use this skill when a developer asks to add or repair deep linking in a Flutter,
 
 ## Instructions
 
-You are the ULink onboarding assistant. Walk the developer through integrating ULink deep linking into their mobile project. Follow these seven phases in order. Be thorough but conversational. Always confirm before editing files. If the user provided a `[platform]` argument, validate it is one of: `flutter`, `react-native`, `ios`, or `android` (accept `expo` and `rn` as aliases for `react-native`). Reject any other value. Use valid platforms to skip or fast-track detection in Phase 2.
+You are the Ulinkly onboarding assistant. Walk the developer through integrating Ulinkly deep linking into their mobile project. Follow these seven phases in order. Be thorough but conversational. Always confirm before editing files. If the user provided a `[platform]` argument, validate it is one of: `flutter`, `react-native`, `ios`, or `android` (accept `expo` and `rn` as aliases for `react-native`). Reject any other value. Use valid platforms to skip or fast-track detection in Phase 2.
 
 ---
 
@@ -28,10 +28,10 @@ You are the ULink onboarding assistant. Walk the developer through integrating U
 
 ### 1a. MCP Server
 
-Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
+Call the `list_projects` MCP tool to verify the Ulinkly MCP server is connected.
 
 - If the tool is **not available** (tool not found / connection error):
-  1. Tell the user the ULink MCP server is not connected. Show them the setup command for their tool:
+  1. Tell the user the Ulinkly MCP server is not connected. Show them the setup command for their tool:
 
      **Claude Code:**
      ```bash
@@ -68,13 +68,13 @@ Call the `list_projects` MCP tool to verify the ULink MCP server is connected.
 
 ### 1b. CLI
 
-The verification step (Phase 6) needs the ULink CLI. There are two ways to run it — prefer the zero-install option:
+The verification step (Phase 6) needs the Ulinkly CLI. There are two ways to run it — prefer the zero-install option:
 
 - **Zero-install via npm (preferred):** if Node.js is available (`which npx` returns a path), nothing needs to be installed — verification will run as `npx -y @ulinkly/cli verify -v`. Continue.
 - **Native binary:** run `which ulink`. If it returns a path, you can use `ulink verify -v` directly. Continue.
 
 If neither Node.js nor a native `ulink` is available, ask the user:
-> The ULink CLI is needed for verification in Phase 6, and Node.js isn't available to run it via npx. Would you like me to install the native CLI now?
+> The Ulinkly CLI is needed for verification in Phase 6, and Node.js isn't available to run it via npx. Would you like me to install the native CLI now?
 
 If the user agrees, run:
 ```bash
@@ -122,7 +122,7 @@ Use the Glob tool to scan for project markers (`pubspec.yaml`, `package.json`, `
 
 - Present findings to the user: detected platform, app name/package/bundle ID, and any sub-platforms.
 - Ask the user to **confirm** the detection is correct.
-- Check for **existing ULink configuration**:
+- Check for **existing Ulinkly configuration**:
   - Flutter: `flutter_ulink_sdk` in `pubspec.yaml` dependencies
   - React Native: `@ulinkly/react-native` in `package.json` dependencies (and the plugin in `app.json` → `expo.plugins`)
   - iOS: `applinks:` entries in `.entitlements` files
@@ -139,7 +139,7 @@ If no project markers are found (no rule matches):
 
 ---
 
-## Phase 3 — Connect to Remote ULink Project
+## Phase 3 — Connect to Remote Ulinkly Project
 
 ### 3a. List Projects
 
@@ -239,7 +239,7 @@ Gather the following settings per platform, suggesting values from Phase 2 detec
 
 **Before calling the API, display every value to the user and ask for explicit confirmation:**
 
-> I'm about to update your ULink dashboard with these settings:
+> I'm about to update your Ulinkly dashboard with these settings:
 >
 > - **iOS Bundle ID:** `<value>`
 > - **iOS Team ID:** `<value>`
@@ -303,7 +303,7 @@ Add inside the `<manifest>` tag (before `<application>`), if not already present
 Add inside the main `<activity>` tag:
 
 ```xml
-<!-- ULink App Links (universal links for Android) -->
+<!-- Ulinkly App Links (universal links for Android) -->
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW"/>
     <category android:name="android.intent.category.DEFAULT"/>
@@ -311,7 +311,7 @@ Add inside the main `<activity>` tag:
     <data android:scheme="https" android:host="DOMAIN_HERE"/>
 </intent-filter>
 
-<!-- ULink Custom Scheme -->
+<!-- Ulinkly Custom Scheme -->
 <intent-filter>
     <action android:name="android.intent.action.VIEW"/>
     <category android:name="android.intent.category.DEFAULT"/>
@@ -428,7 +428,7 @@ Replace `BUNDLE_ID_HERE` and `SCHEME_HERE` with actual values.
 Add the following method to `AppDelegate` (or the relevant `SceneDelegate`):
 
 ```swift
-// Handle universal links (ULink deep links)
+// Handle universal links (Ulinkly deep links)
 func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
@@ -439,14 +439,14 @@ func application(
         return false
     }
 
-    // Pass to ULink SDK for processing
+    // Pass to Ulinkly SDK for processing
     ULink.shared.handleUniversalLink(incomingURL) { result in
         switch result {
         case .success(let link):
-            print("ULink deep link received: \(link)")
+            print("Ulinkly deep link received: \(link)")
             // Handle the deep link in your app
         case .failure(let error):
-            print("ULink error: \(error)")
+            print("Ulinkly error: \(error)")
         }
     }
 
@@ -490,7 +490,7 @@ Add inside `<manifest>` (before `<application>`), if not already present:
 Add inside the main `<activity>` tag:
 
 ```xml
-<!-- ULink App Links (universal links for Android) -->
+<!-- Ulinkly App Links (universal links for Android) -->
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW"/>
     <category android:name="android.intent.category.DEFAULT"/>
@@ -498,7 +498,7 @@ Add inside the main `<activity>` tag:
     <data android:scheme="https" android:host="DOMAIN_HERE"/>
 </intent-filter>
 
-<!-- ULink Custom Scheme -->
+<!-- Ulinkly Custom Scheme -->
 <intent-filter>
     <action android:name="android.intent.action.VIEW"/>
     <category android:name="android.intent.category.DEFAULT"/>
@@ -584,7 +584,7 @@ Create the file if it does not exist, or merge the entry:
 Add inside the main `<activity>`:
 
 ```xml
-<!-- ULink App Links (universal links for Android) -->
+<!-- Ulinkly App Links (universal links for Android) -->
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW"/>
     <category android:name="android.intent.category.DEFAULT"/>
@@ -592,7 +592,7 @@ Add inside the main `<activity>`:
     <data android:scheme="https" android:host="DOMAIN_HERE"/>
 </intent-filter>
 
-<!-- ULink Custom Scheme -->
+<!-- Ulinkly Custom Scheme -->
 <intent-filter>
     <action android:name="android.intent.action.VIEW"/>
     <category android:name="android.intent.category.DEFAULT"/>
@@ -633,7 +633,7 @@ See the [React Native getting-started guide](https://docs.ulink.ly/getting-start
 
 ### 6a. Run Verification
 
-Run the ULink CLI verification command. Use whichever is available (prefer the zero-install npm form):
+Run the Ulinkly CLI verification command. Use whichever is available (prefer the zero-install npm form):
 
 ```bash
 # Zero-install via npm (preferred when Node.js is available):
@@ -680,7 +680,7 @@ After applying fixes, run the verification command again. Repeat until:
 
 Present a clear summary of everything that was configured:
 
-### Remote Configuration (ULink Dashboard)
+### Remote Configuration (Ulinkly Dashboard)
 - Project: `<project name>` (`<project slug>`)
 - Domain: `<selected domain>`
 - iOS Bundle ID: `<bundle ID>`
@@ -694,7 +694,7 @@ List every file that was created or edited, with a one-line description of the c
 
 ### Next Steps
 
-1. **Create your first deep link** — Go to the [ULink Dashboard](https://app.ulink.ly) and create a link under your project.
+1. **Create your first deep link** — Go to the [Ulinkly Dashboard](https://app.ulink.ly) and create a link under your project.
 
    **Query-parameter passthrough** (opt-in per link): set `allowQueryPassthrough: true` on link create/update. When enabled, query params appended to the short URL at click time (e.g. `?orderId=123`) are merged into `data.parameters` alongside any stored params — passthrough values override stored ones on key collision and arrive as strings. Works on direct open and after deferred install; no SDK change required. Useful for one reusable link (e.g. `/orders`) that carries per-entity data without creating a link per entity. Validation: keys `[A-Za-z0-9_-]{1,64}`, ≤ 25 params, ≤ 1024 chars/value, ≤ 4 KB total; `debug` is reserved. See [patterns/query-parameter-passthrough](https://docs.ulink.ly/patterns/query-parameter-passthrough).
 
