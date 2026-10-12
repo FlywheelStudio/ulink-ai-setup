@@ -1,0 +1,60 @@
+name: SDK version sync
+
+# Daily: compare the SDK versions pinned in skills/setup-ulink/SKILL.md with
+# Maven Central, CocoaPods, and pub.dev, and open or refresh a PR against main
+# when an SDK has a newer release. ulink.ly serves this file from main, so
+# merging updates the served skill on the next ulink.ly deploy; the npm package
+# @ulinkly/setup needs a release to ship it.
+
+on:
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sdk-version-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Update pins to the latest published versions
+        id: sync
+        run: node scripts/sdk-versions.mjs --write
+      - name: Open or update the sync PR
+        if: steps.sync.outputs.summary != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUMMARY: ${{ steps.sync.outputs.summary }}
+        run: |
+          branch=chore/sdk-version-sync
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add skills/setup-ulink/SKILL.md
+          git commit -m "docs(skill): sync SDK versions ($SUMMARY)"
+          git push --force origin "$branch"
+          body=$(printf '%s\n\n%s' \
+            "Automated by the SDK version sync workflow: $SUMMARY." \
+            "Check the SDK changelogs for anything the skill should mention (for example a raised minimum platform version). After merging, ulink.ly picks this up on its next deploy; publish a new @ulinkly/setup version to ship it on npm.")
+          existing=$(gh pr list --head "$branch" --base main --state open --json number -q '.[0].number')
+          if [ -z "$existing" ]; then
+            gh pr create --base main --head "$branch" --title "docs(skill): sync SDK versions" --body "$body"
+          else
+            gh pr edit "$existing" --body "$body"
+          fi
