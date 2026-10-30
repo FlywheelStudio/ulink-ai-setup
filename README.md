@@ -107,6 +107,8 @@ curl -fsSL https://ulink.ly/install.sh | bash
 
 - [Documentation](https://docs.ulink.ly/getting-started/ai-setup)
 - [Ulinkly dashboard](https://ulink.ly/dashboard)
+- [Framework guides (Flutter, iOS, Android, React Native)](https://ulink.ly/framework)
+- [Migrating from Firebase Dynamic Links](https://ulink.ly/migrate/firebase-dynamic-links)
 - [Open agent-skills CLI (vercel-labs/skills)](https://github.com/vercel-labs/skills)
 
 ## License

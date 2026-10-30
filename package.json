@@ -15,6 +15,7 @@
     "url": "https://github.com/FlywheelStudio/ulink-ai-setup"
   },
   "license": "MIT",
+  "homepage": "https://docs.ulink.ly/getting-started/ai-setup",
   "keywords": [
     "ulink",
     "deep-linking",
