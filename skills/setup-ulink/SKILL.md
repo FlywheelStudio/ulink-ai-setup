@@ -282,7 +282,7 @@ Then call the `configure_project` MCP tool with the confirmed settings:
 Add under `dependencies:`:
 
 ```yaml
-  flutter_ulink_sdk: ^0.4.3
+  flutter_ulink_sdk: ^0.4.4
 ```
 
 `flutter_ulink_sdk` 0.4.x requires Flutter 3.38+ (Dart 3.10+). If the project's Flutter is older, use `^0.3.9` instead.
@@ -466,7 +466,7 @@ func application(
 
 ```groovy
 dependencies {
-    implementation 'ly.ulink:ulink-sdk:1.2.3'
+    implementation 'ly.ulink:ulink-sdk:1.2.4'
 }
 ```
 
@@ -474,7 +474,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("ly.ulink:ulink-sdk:1.2.3")
+    implementation("ly.ulink:ulink-sdk:1.2.4")
 }
 ```
 
